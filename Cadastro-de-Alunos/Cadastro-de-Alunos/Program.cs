@@ -1,4 +1,9 @@
 ﻿using Cadastro_de_Alunos;
+using Cadastro_de_Alunos.DAL;
+using Cadastro_de_Alunos.Models;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.IO;
 
 Console.WriteLine("GERENCIADOR DE ALUNOS");
 Console.WriteLine();
@@ -45,8 +50,7 @@ while (true)
         case "2":
             Console.WriteLine("REGISTRO DE ALUNOS");
             Console.WriteLine();
-            //Listar alunos
-            Console.ReadKey(); //Continua a execução do sistema quando digitar qualquer tecla
+
             Console.Clear();
             break;
 
@@ -90,3 +94,49 @@ while (true)
             continue; // Continua pedindo a opção
     }
 }
+
+/*class Program
+{
+    private static IConfiguration _iconfiguration;
+    static void Main(string[] args)
+    {
+        GetAppSettingsFile();
+        PrintCountries();
+    }
+    static void GetAppSettingsFile()
+    {
+        var builder = new ConfigurationBuilder()
+                             .SetBasePath(Directory.GetCurrentDirectory())
+                             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+        _iconfiguration = builder.Build();
+    }
+    static void PrintCountries()
+    {
+        var Aluno = new AlunoDAL(_iconfiguration);
+        var listAluno = Aluno.GetList();
+        listAluno.ForEach(item =>
+        {
+            Console.WriteLine(item.Id);
+            Console.WriteLine(item.Nome);
+            Console.WriteLine(item.Sobrenome);
+            Console.WriteLine(item.Nascimento);
+            Console.WriteLine(item.Sexo);
+            Console.WriteLine(item.Email);
+            Console.WriteLine(item.DataDeCadastro);
+            Console.WriteLine(item.Telefone);
+            Console.WriteLine(item.Cep);
+            Console.WriteLine(item.Logradouro);
+            Console.WriteLine(item.Complemento);
+            Console.WriteLine(item.Bairro);
+            Console.WriteLine(item.Localidade);
+            Console.WriteLine(item.UF);
+            Console.WriteLine(item.DataDeAtualizacao);
+            Console.WriteLine(item.Ativo);
+            Console.WriteLine();
+        });
+        Console.WriteLine("Press any key to stop.");
+        Console.ReadKey();
+    }
+}
+
+Console.ReadKey(); //Continua a execução do sistema quando digitar qualquer tecla*/

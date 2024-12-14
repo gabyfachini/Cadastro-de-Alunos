@@ -9,11 +9,6 @@ namespace Cadastro_de_Alunos.Models
 {
     public class Aluno
     {
-        public Aluno(string nome, string sobrenome)
-        {
-            Nome = nome;
-            Sobrenome = sobrenome;
-        }
         public int Id { get; set; } //obrigatório
         public string Nome { get; set; } //obrigatório
         public string Sobrenome { get; set; } //obrigatório
@@ -31,33 +26,5 @@ namespace Cadastro_de_Alunos.Models
         public DateTime? DataDeAtualizacao { get; set; }     //CAMPO DE AUDITORIA - Data da última atualização (pode ser nula) 
         public bool Ativo { get; set; }                       //CAMPO DE AUDITORIA - 1 = ativo e 0 = excluído - campo obrigatório
 
-    }
-
-    class Program
-    {
-        private static IConfiguration _iconfiguration;
-        static void Main(string[] args)
-        {
-            GetAppSettingsFile();
-            PrintCountries();
-        }
-        static void GetAppSettingsFile()
-        {
-            var builder = new ConfigurationBuilder()
-                                 .SetBasePath(Directory.GetCurrentDirectory())
-                                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-            _iconfiguration = builder.Build();
-        }
-        static void PrintCountries()
-        {
-            var CountryDAL = new CountryDAL(_iconfiguration);
-            var listCountryModel = countryDAL.GetList();
-            listCountryModel.ForEach(item =>
-            {
-                Console.WriteLine(item.Country);
-            });
-            Console.WriteLine("Press any key to stop.");
-            Console.ReadKey();
-        }
     }
 }
