@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,7 +14,8 @@ namespace Cadastro_de_Alunos.Services
         private readonly HttpClient _httpClient;
         public ViaCepService ()
         {
-            _httpClient = new HttpClient (); //estudar injeção de dependencia, trycatch
+            //HttpClient é uma classe usada para fazer requisições HTTP
+            _httpClient = new HttpClient (); //Estudar injeção de dependencia para melhoria deste código
         }
         public async Task<Endereco?> BuscarEnderecoPorCepAsync(string cep)
         {

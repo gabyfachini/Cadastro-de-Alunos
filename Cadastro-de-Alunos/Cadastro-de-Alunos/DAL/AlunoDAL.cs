@@ -42,8 +42,8 @@ namespace Cadastro_de_Alunos.DAL
                             Sexo = Convert.ToChar(rdr[4]),
                             Email = Convert.ToString(rdr[5]),
                             /*DataDeCadastro = Convert.ToDateTime(rdr[15]),*/ //Essa informção está vindo errada
-                            Telefone = Convert.ToString(rdr[6]), 
-                            Cep = Convert.ToString(rdr[7]), 
+                            Telefone = Convert.ToString(rdr[6]),
+                            Cep = Convert.ToString(rdr[7]),
                             Logradouro = Convert.ToString(rdr[8]),
                             Complemento = Convert.ToString(rdr[9]),
                             Bairro = Convert.ToString(rdr[10]),
