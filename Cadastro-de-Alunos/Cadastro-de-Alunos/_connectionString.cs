@@ -1,8 +1,19 @@
-﻿
-internal class _connectionString
+﻿using Microsoft.Extensions.Configuration;
+
+internal static class _connectionString
 {
-    internal static string GetConnectionString(string v)
+    private static IConfiguration Configuration { get; }
+
+    static _connectionString()
     {
-        throw new NotImplementedException();
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json");
+        Configuration = builder.Build();
+    }
+
+    public static string GetConnectionString(string name)
+    {
+        return Configuration.GetConnectionString(name);
     }
 }
