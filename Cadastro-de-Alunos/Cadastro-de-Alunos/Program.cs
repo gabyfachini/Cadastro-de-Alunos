@@ -97,7 +97,7 @@ internal class Program
                     Console.WriteLine("REGISTRO DE ALUNOS");
                     Console.WriteLine();
                     GetAppSettingsFile();// Configurações de leitura do arquivo
-                    PrintCountries();  // Exibe os dados dos alunos
+                    PrintAlunos();  // Exibe os dados dos alunos
                     Console.Clear();
                     break;
 
@@ -123,7 +123,7 @@ internal class Program
                     Console.ReadKey();
                     Console.Clear();
                     break;
-                case "5":
+                case "5": //Remover isso, trazer o case 4 para ca
                     Console.WriteLine("EXCLUSÃO DE ALUNO");
                     Console.WriteLine();
                     Console.WriteLine("Qual o ID do aluno que cancelou o cadastro?");
@@ -148,7 +148,7 @@ internal class Program
             _iconfiguration = builder.Build();
         }
 
-        void PrintCountries()
+        void PrintAlunos()
         {
             var Aluno = new AlunoDAL(_iconfiguration);
             var listAluno = Aluno.GetList();
@@ -249,7 +249,7 @@ internal class Program
             {
                 aluno.Ativo = false;
                 aluno.DataDeAtualizacao = DateTime.Now;
-                Console.WriteLine($"Aluno {aluno.Nome} foi marcado como inativo.");
+                Console.WriteLine($"Aluno {aluno.Nome} foi marcado como inativo."); //Conectar com o banco
             }
             else
             {
