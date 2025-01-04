@@ -27,8 +27,9 @@ namespace Cadastro_de_Alunos.DAL
             {
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
-                    SqlCommand cmd = new SqlCommand("SP_ALUNO_GET_LIST", con);
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    // Modificando a consulta SQL para incluir o filtro Ativo = 1
+                    SqlCommand cmd = new SqlCommand("SELECT Id, Nome, Sobrenome, Nascimento, Sexo, Email, Telefone, Cep, Logradouro, Complemento, Bairro, Localidade, UF, DataDeAtualizacao, Ativo FROM Aluno WHERE Ativo = 1", con);
+                    cmd.CommandType = CommandType.Text; // Mudando de CommandType.StoredProcedure para CommandType.Text para usar a consulta SQL diretamente
                     con.Open();
                     SqlDataReader rdr = cmd.ExecuteReader();
                     while (rdr.Read())

@@ -15,8 +15,6 @@ internal class Program
     private static void Main(string[] args)
     {
         IConfiguration _iconfiguration = null;
-        /*async Task Main(string[] args)
-        {*/
 
         Console.WriteLine("GERENCIADOR DE ALUNOS");
         Console.WriteLine();
@@ -26,8 +24,8 @@ internal class Program
             Console.WriteLine("1. Cadastrar Aluno");
             Console.WriteLine("2. Listar Alunos");
             Console.WriteLine("3. Buscar Aluno");
-            Console.WriteLine("4. Atualizar Aluno"); //Aqui eu coloco se o aluno ainda esta ativo ou não
-            Console.WriteLine("5. Excluir Aluno"); //Não era para eu inativar aqui?
+            Console.WriteLine("4. Atualizar Aluno"); //Implementar depois, não é tão importante agora
+            Console.WriteLine("5. Excluir Aluno"); 
             Console.WriteLine("0. Sair");
             Console.Write("Opção escolhida: ");
             string opcao = Console.ReadLine();
@@ -40,18 +38,22 @@ internal class Program
 
                     Console.WriteLine("Digite o nome do aluno:");
                     novoAluno.Nome = Console.ReadLine();
+
                     Console.WriteLine("Digite o sobrenome do aluno:");
                     novoAluno.Sobrenome = Console.ReadLine();
-                    Console.WriteLine("Digite a data de nascimento (formato: YYYY-MM-DD):");
+
+                    Console.WriteLine("Digite a data de nascimento (formato: YYYY-MM-DD):"); //Depois colocar outras opções de formato de datas
+
                     if (DateTime.TryParse(Console.ReadLine(), out DateTime nascimento))
                     {
                         novoAluno.Nascimento = nascimento;
                     }
                     else
                     {
-                        Console.WriteLine("Data de nascimento inválida!");
+                        Console.WriteLine("Data de nascimento inválida! Tente novamente.");
                         return;
                     }
+
                     Console.WriteLine("Digite o sexo (M/F):");
                     string sexo;
                     do
@@ -60,32 +62,41 @@ internal class Program
                         if (sexo != "M" && sexo != "F")
                         {
                             Console.WriteLine("Entrada inválida. Digite Novamente!");
+                            return;
                         }
                     } while (sexo != "M" && sexo != "F");
                     novoAluno.Sexo = char.Parse(sexo);
 
                     Console.WriteLine("Digite o email:");
                     novoAluno.Email = Console.ReadLine();
+
                     Console.WriteLine("Digite o telefone:");
                     novoAluno.Telefone = Console.ReadLine();
+
                     Console.WriteLine("Digite o CEP:");
-                    /*await CadastrarAlunoAsync();*/
+                    //Colocar a conexão com a API
                     novoAluno.Cep = Console.ReadLine();
+
                     Console.WriteLine("Digite o logradouro:");
                     novoAluno.Logradouro = Console.ReadLine();
+
                     Console.WriteLine("Digite o complemento:");
                     novoAluno.Complemento = Console.ReadLine();
+
                     Console.WriteLine("Digite o bairro:");
                     novoAluno.Bairro = Console.ReadLine();
+
                     Console.WriteLine("Digite a localidade/cidade:");
                     novoAluno.Localidade = Console.ReadLine();
+
                     Console.WriteLine("Digite o UF:");
                     novoAluno.UF = Console.ReadLine();
+
                     novoAluno.DataDeAtualizacao = novoAluno.DataDeCadastro = DateTime.Now;
                     novoAluno.Ativo = true;
 
                     string connectionString = _connectionString.GetConnectionString("Default"); // Obtém a string de conexão usando o método GetConnectionString
-                    CadastrarAluno(novoAluno, connectionString); //Passe a string de conexão como argumento ao método
+                    CadastrarAluno(novoAluno, connectionString); //Passa a string de conexão como argumento ao método
 
                     Console.Clear();
                     Console.WriteLine("Aluno cadastrado com sucesso!");
@@ -93,11 +104,11 @@ internal class Program
                     Console.Clear();
                     break;
 
-                case "2": //Fazer um filtro para vir só aluno ativos
+                case "2": 
                     Console.WriteLine("REGISTRO DE ALUNOS");
                     Console.WriteLine();
-                    GetAppSettingsFile();// Configurações de leitura do arquivo
-                    PrintAlunos();  // Exibe os dados dos alunos
+                    GetAppSettingsFile();
+                    PrintListarAlunos();
                     Console.Clear();
                     break;
 
@@ -105,10 +116,9 @@ internal class Program
                     Console.WriteLine("BUSCA DE ALUNO");
                     Console.WriteLine();
                     GetAppSettingsFile();
-                    PrintCountries2();
+                    PrintBuscarAlunos();
                     //posteriormente eu vou colocar uma lista de opções para verificar qual informação do aluno a pessoa quer colocar para verificar no banco de dados (FONTEND)
-                    //Depois incrementar aqui a opção da pessoa fazer uma nova pesquisa de aluno sem sair do case, promove agilidade
-                    Console.ReadKey(); //Continua a execução do sistema quando digitar qualquer tecla
+                    Console.ReadKey();
                     break;
 
                 case "4":
@@ -116,31 +126,58 @@ internal class Program
                     var alunos = GetAlunosFromDatabase(connectionString2);
                     Console.WriteLine("ATUALIZAÇÃO DE CADASTRO");
                     Console.WriteLine();
-                    Console.WriteLine("Qual o ID do aluno a ser desativado?");
-                    int idEscolhido = int.Parse(Console.ReadLine());
-                    SoftDelete(alunos, idEscolhido);
-                    //Depois incrementar aqui a opção da pessoa fazer uma nova atualização sem sair do case, promove agilidade*/
+                    Console.WriteLine("Qual informação a ser atualizada?");
+                    //Criar o código
                     Console.ReadKey();
                     Console.Clear();
                     break;
-                case "5": //Remover isso, trazer o case 4 para ca
+
+                case "5": 
                     Console.WriteLine("EXCLUSÃO DE ALUNO");
                     Console.WriteLine();
-                    Console.WriteLine("Qual o ID do aluno que cancelou o cadastro?");
-                    string nome3 = Console.ReadLine();
-                    Console.ReadKey(); //Continua a execução do sistema quando digitar qualquer tecla
+
+                    GetAppSettingsFile();
+                    // Obtendo a string de conexão do appsettings.json
+                    string minhaConnectionString = _iconfiguration.GetConnectionString("Default");
+
+                    while (true) 
+                    {
+                        Console.WriteLine("Qual o ID do aluno que cancelou o cadastro?");
+                        if (int.TryParse(Console.ReadLine(), out int idEscolhido))
+                        {
+                            // Passa a string de conexão para o método SoftDelete
+                            SoftDelete(minhaConnectionString, idEscolhido);
+
+                        }
+                        else
+                        {
+                            Console.WriteLine("ID inválido. Tente novamente.");
+                        }
+
+                        Console.WriteLine("Deseja excluir outro aluno? (S/N)");
+                        string resposta2 = Console.ReadLine()?.ToUpper();
+                        if (resposta2 != "S")
+                        {
+                            break;
+                        }
+                        Console.Clear(); 
+                    }
+
+                    Console.ReadKey(); 
                     Console.Clear();
                     break;
+
                 case "0":
                     Console.WriteLine("O programa está prestes a ser encerrado.");
                     return; // Finaliza o método Main, encerrando o programa
+
                 default:
                     Console.WriteLine("Opção inválida!");
                     continue; // Continua pedindo a opção
             }
         }
 
-        void GetAppSettingsFile()
+        void GetAppSettingsFile() //Método de conexão com o banco de dados
         {
             var builder = new ConfigurationBuilder()
                                  .SetBasePath(Directory.GetCurrentDirectory())
@@ -148,10 +185,60 @@ internal class Program
             _iconfiguration = builder.Build();
         }
 
-        void PrintAlunos()
+        void CadastrarAluno(Aluno aluno, string _connectionString) //Envio de informações para o Banco de Dados
         {
-            var Aluno = new AlunoDAL(_iconfiguration);
-            var listAluno = Aluno.GetList();
+            if (aluno == null)
+            {
+                throw new ArgumentNullException(nameof(aluno), "O aluno não pode ser nulo.");
+            }
+            var sql = @"
+        INSERT INTO Aluno 
+        (Nome, Sobrenome, Nascimento, Sexo, Email, Telefone, Cep, Logradouro, Complemento, Bairro, Localidade, UF, DataDeCadastro, DataDeAtualizacao, Ativo)
+        VALUES
+        (@Nome, @Sobrenome, @Nascimento, @Sexo, @Email, @Telefone, @Cep, @Logradouro, @Complemento, @Bairro, @Localidade, @UF, @DataDeCadastro, @DataDeAtualizacao, @Ativo)";
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@Nome", aluno.Nome);
+                    command.Parameters.AddWithValue("@Sobrenome", aluno.Sobrenome);
+                    command.Parameters.AddWithValue("@Nascimento", aluno.Nascimento);
+                    command.Parameters.AddWithValue("@Sexo", aluno.Sexo);
+                    command.Parameters.AddWithValue("@Email", aluno.Email);
+                    command.Parameters.AddWithValue("@Telefone", aluno.Telefone);
+                    command.Parameters.AddWithValue("@Cep", aluno.Cep);
+                    command.Parameters.AddWithValue("@Logradouro", aluno.Logradouro);
+                    command.Parameters.AddWithValue("@Complemento", aluno.Complemento);
+                    command.Parameters.AddWithValue("@Bairro", aluno.Bairro);
+                    command.Parameters.AddWithValue("@Localidade", aluno.Localidade);
+                    command.Parameters.AddWithValue("@UF", aluno.UF);
+                    command.Parameters.AddWithValue("@DataDeCadastro", aluno.DataDeCadastro);
+                    command.Parameters.AddWithValue("@DataDeAtualizacao", aluno.DataDeAtualizacao);
+                    command.Parameters.AddWithValue("@Ativo", aluno.Ativo);
+
+                    connection.Open();
+                    command.ExecuteNonQuery(); // Executa o comando SQL
+                }
+            }
+
+        }
+
+        static List<Aluno> GetAlunosFromDatabase(string connectionString) // Método para buscar alunos no banco de dados
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var sql = "SELECT * FROM Aluno WHERE Ativo = 1";
+                var alunos = connection.Query<Aluno>(sql).ToList(); // Usando Dapper para mapear os dados para objetos Aluno
+                return alunos;
+            }
+        }
+
+        void PrintListarAlunos()
+        {
+            var AlunoDAL = new AlunoDAL(_iconfiguration);
+            var listAluno = AlunoDAL.GetList();
             listAluno.ForEach(item =>
             {
                 Console.WriteLine($"ID: {item.Id}");
@@ -171,19 +258,22 @@ internal class Program
             });
             Console.WriteLine("Pressione qualquer tecla para voltar ao menu");
             Console.ReadKey();
+            Console.Clear();
         }
-        void PrintCountries2() 
+
+        void PrintBuscarAlunos()
         {
             var Aluno = new AlunoDAL(_iconfiguration);
             var listAluno = Aluno.GetList();
             Console.Write("Digite o ID do aluno que deseja buscar: ");
             Console.WriteLine();
-            while (true) {
 
+            while (true)
+            {
                 if (int.TryParse(Console.ReadLine(), out int idEscolhido))
                 {
+                    var aluno = listAluno.FirstOrDefault(a => a.Id == idEscolhido);
 
-                    var aluno = listAluno.FirstOrDefault(a => a.Id == idEscolhido); // Procurar o aluno na lista com o ID fornecido
                     if (aluno != null)
                     {
                         Console.WriteLine($"ID: {aluno.Id}");
@@ -202,58 +292,52 @@ internal class Program
                     }
                     else
                     {
-                        Console.WriteLine("Aluno não encontrado com o ID fornecido.");
+                        Console.WriteLine("Aluno não encontrado.");
                     }
                 }
-                else
-                {
-                    Console.WriteLine("ID inválido. Por favor, digite um número inteiro.");
-                }
+                Console.WriteLine("Pressione qualquer tecla para voltar ao menu");
                 Console.ReadKey();
+                Console.Clear();
+                break;
             }
         }
 
-        void CadastrarAluno(Aluno aluno, string _connectionString) //Envio de informações para o Banco de Dados
+        static void SoftDelete(string connectionString2, int idAluno) // Método SoftDelete para desativar o aluno
         {
-            if (aluno == null)
-            {
-                throw new ArgumentNullException(nameof(aluno), "O aluno não pode ser nulo.");
-            }
+            // Query SQL para atualizar o campo Ativo no banco de dados
             var sql = @"
-        INSERT INTO Aluno 
-        (Nome, Sobrenome, Nascimento, Sexo, Email, Telefone, Cep, Logradouro, Complemento, Bairro, Localidade, UF, DataDeCadastro, DataDeAtualizacao, Ativo)
-        VALUES
-        (@Nome, @Sobrenome, @Nascimento, @Sexo, @Email, @Telefone, @Cep, @Logradouro, @Complemento, @Bairro, @Localidade, @UF, @DataDeCadastro, @DataDeAtualizacao, @Ativo)";
+        UPDATE Aluno 
+        SET Ativo = 0, DataDeAtualizacao = @DataDeAtualizacao 
+        WHERE Id = @Id";
 
-            using (var connection = new SqlConnection(_connectionString))
+            // Conexão com o banco de dados
+            using (var connection = new SqlConnection(connectionString2))
             {
-                connection.Execute(sql, aluno);
-            }
-        }
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    // Adiciona os parâmetros
+                    command.Parameters.AddWithValue("@Id", idAluno);
+                    command.Parameters.AddWithValue("@DataDeAtualizacao", DateTime.Now);
 
-        static List<Aluno> GetAlunosFromDatabase(string connectionString) // Método para buscar alunos no banco de dados
-        {
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                var sql = "SELECT Id, Nome, Ativo, DataDeAtualizacao FROM Aluno"; // Ajuste a consulta conforme sua tabela
-                var alunos = connection.Query<Aluno>(sql).ToList(); // Usando Dapper para mapear os dados para objetos Aluno
-                return alunos;
-            }
-        }
+                    try
+                    {
+                        connection.Open(); // Abre a conexão
+                        int rowsAffected = command.ExecuteNonQuery(); // Executa o comando SQL
 
-        static void SoftDelete(List<Aluno> alunos, int idAluno) // Método SoftDelete para desativar o aluno
-        {
-            var aluno = alunos.FirstOrDefault(a => a.Id == idAluno);
-            if (aluno != null)
-            {
-                aluno.Ativo = false;
-                aluno.DataDeAtualizacao = DateTime.Now;
-                Console.WriteLine($"Aluno {aluno.Nome} foi marcado como inativo."); //Conectar com o banco
-            }
-            else
-            {
-                Console.WriteLine("Aluno não encontrado.");
+                        if (rowsAffected > 0)
+                        {
+                            Console.WriteLine($"Aluno com ID {idAluno} foi marcado como inativo.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Aluno não encontrado no banco de dados.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erro ao desativar aluno: {ex.Message}");
+                    }
+                }
             }
         }
 
@@ -267,52 +351,7 @@ internal class Program
             return configuration.GetConnectionString("Default");
         }
 
+       
+
     }
 }
-
-/*}async Task CadastrarAlunoAsync()
-{
-    // Coletar informações do aluno e interligar ao Banco de Dados
-    Console.WriteLine("CADASTRO DE ALUNO");
-    Console.WriteLine();
-    Console.WriteLine("Digite as seguintes informações: ");
-    Console.WriteLine("a. Nome:");
-    string nome = Console.ReadLine();
-    Console.WriteLine("b. Sobrenome: ");
-    string sobrenome = Console.ReadLine();
-    Console.WriteLine("c. Data de Nascimento: ");
-    string nascimento = Console.ReadLine();
-    Console.WriteLine("d. Sexo (M/F): ");
-    string sexo = Console.ReadLine();
-    Console.WriteLine("e. E-mail: ");
-    string email = Console.ReadLine();
-    Console.WriteLine("f. Telefone: ");
-    string telefone = Console.ReadLine();
-
-    // Solicita o CEP ao usuário
-    var viaCepService = new ViaCepService();
-    Console.WriteLine("Digite o CEP para buscar o endereço: ");
-    string cep = Console.ReadLine();
-
-    // Realiza a busca do endereço pelo CEP
-    var endereco = await viaCepService.BuscarEnderecoPorCepAsync(cep);
-
-    if (endereco != null)
-    {
-        Console.WriteLine("Endereço encontrado:");
-        Console.WriteLine($"CEP: {endereco.Cep}");
-        Console.WriteLine($"Logradouro: {endereco.Logradouro}");
-        Console.WriteLine($"Bairro: {endereco.Bairro}");
-        Console.WriteLine($"Localidade: {endereco.Localidade}");
-        Console.WriteLine($"UF: {endereco.UF}");
-    }
-    else
-    {
-        Console.WriteLine("Não foi possível encontrar o endereço para o CEP informado.");
-        // Possibilidade de digitar novamente o CEP
-    }
-
-    Console.WriteLine("Cadastro efetuado com sucesso!");
-    Console.ReadKey(); // Continua a execução do sistema quando digitar qualquer tecla
-    Console.Clear();
-}*/
