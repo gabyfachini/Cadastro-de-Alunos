@@ -9,10 +9,13 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapper;
+using System.Net.Http;
+using Newtonsoft.Json;
+using System.Reflection.Metadata;
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private static async Task /*void*/ Main(string[] args)
     {
         IConfiguration _iconfiguration = null;
 
@@ -24,7 +27,7 @@ internal class Program
             Console.WriteLine("1. Cadastrar Aluno");
             Console.WriteLine("2. Listar Alunos");
             Console.WriteLine("3. Buscar Aluno");
-            Console.WriteLine("4. Atualizar Aluno"); //Implementar depois, não é tão importante agora
+            Console.WriteLine("4. Atualizar Aluno - Não configurado"); //Implementar depois, não é tão importante agora (FRONT?)
             Console.WriteLine("5. Excluir Aluno"); 
             Console.WriteLine("0. Sair");
             Console.Write("Opção escolhida: ");
@@ -73,33 +76,42 @@ internal class Program
                     Console.WriteLine("Digite o telefone:");
                     novoAluno.Telefone = Console.ReadLine();
 
-                    Console.WriteLine("Digite o CEP:");
-                    //Colocar a conexão com a API
-                    novoAluno.Cep = Console.ReadLine();
-
-                    Console.WriteLine("Digite o logradouro:");
-                    novoAluno.Logradouro = Console.ReadLine();
-
-                    Console.WriteLine("Digite o complemento:");
-                    novoAluno.Complemento = Console.ReadLine();
-
-                    Console.WriteLine("Digite o bairro:");
-                    novoAluno.Bairro = Console.ReadLine();
-
-                    Console.WriteLine("Digite a localidade/cidade:");
-                    novoAluno.Localidade = Console.ReadLine();
-
-                    Console.WriteLine("Digite o UF:");
-                    novoAluno.UF = Console.ReadLine();
-
                     novoAluno.DataDeAtualizacao = novoAluno.DataDeCadastro = DateTime.Now;
                     novoAluno.Ativo = true;
+                    
+                    Console.WriteLine("Digite o CEP:");
+                    var viaCepService = new ViaCepService(new HttpClient());
+                    string cep = Console.ReadLine();
+                    var endereco = await viaCepService.BuscarEnderecoPorCepAsync(cep);
 
-                    string connectionString = _connectionString.GetConnectionString("Default"); // Obtém a string de conexão usando o método GetConnectionString
-                    CadastrarAluno(novoAluno, connectionString); //Passa a string de conexão como argumento ao método
+                    if (endereco != null)
+                    {
+                        Console.WriteLine("Dados do Endereço do Aluno:");
+                        Console.WriteLine($"CEP: {endereco.Cep}");
+                        Console.WriteLine($"Logradouro: {endereco.Logradouro}");
+                        Console.WriteLine($"Complemento: {endereco.Complemento}");
+                        Console.WriteLine($"Bairro: {endereco.Bairro}");
+                        Console.WriteLine($"Localidade: {endereco.Localidade}");
+                        Console.WriteLine($"UF: {endereco.UF}");
 
-                    Console.Clear();
-                    Console.WriteLine("Aluno cadastrado com sucesso!");
+                        novoAluno.Cep = endereco.Cep;
+                        novoAluno.Logradouro = endereco.Logradouro;
+                        novoAluno.Complemento = endereco.Complemento ?? "N/A"; // Se complemento for nulo subtitui por N/A
+                        novoAluno.Bairro = endereco.Bairro;
+                        novoAluno.Localidade = endereco.Localidade;
+                        novoAluno.UF = endereco.UF;
+
+                        string connectionString = _connectionString.GetConnectionString("Default");
+                        CadastrarAluno(novoAluno, connectionString);
+
+                        Console.WriteLine();
+                        Console.WriteLine("Aluno cadastrado com sucesso!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Endereço não encontrado.");
+                    }
+
                     Console.ReadKey();
                     Console.Clear();
                     break;
@@ -178,12 +190,12 @@ internal class Program
         }
 
         void GetAppSettingsFile() //Método de conexão com o banco de dados
-        {
-            var builder = new ConfigurationBuilder()
-                                 .SetBasePath(Directory.GetCurrentDirectory())
-                                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-            _iconfiguration = builder.Build();
-        }
+            {
+                var builder = new ConfigurationBuilder()
+                                     .SetBasePath(Directory.GetCurrentDirectory())
+                                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                _iconfiguration = builder.Build();
+            }
 
         void CadastrarAluno(Aluno aluno, string _connectionString) //Envio de informações para o Banco de Dados
         {
@@ -195,7 +207,7 @@ internal class Program
         INSERT INTO Aluno 
         (Nome, Sobrenome, Nascimento, Sexo, Email, Telefone, Cep, Logradouro, Complemento, Bairro, Localidade, UF, DataDeCadastro, DataDeAtualizacao, Ativo)
         VALUES
-        (@Nome, @Sobrenome, @Nascimento, @Sexo, @Email, @Telefone, @Cep, @Logradouro, @Complemento, @Bairro, @Localidade, @UF, @DataDeCadastro, @DataDeAtualizacao, @Ativo)";
+        (@Nome, @Sobrenome, @Nascimento, @Sexo, @Email, @Telefone, @Cep, @Logradouro, @Complemento, @Bairro, @Localidade, @UF,  @DataDeCadastro, @DataDeAtualizacao, @Ativo)";
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -298,7 +310,7 @@ internal class Program
                 Console.WriteLine("Pressione qualquer tecla para voltar ao menu");
                 Console.ReadKey();
                 Console.Clear();
-                break;
+                return;
             }
         }
 
