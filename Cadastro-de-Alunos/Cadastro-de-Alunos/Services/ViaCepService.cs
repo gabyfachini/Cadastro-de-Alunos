@@ -18,7 +18,7 @@ namespace Cadastro_de_Alunos.Services
         }
         public async Task<Endereco?> BuscarEnderecoPorCepAsync(string cep)
         {
-            if (cep.Length != 8)
+            if (cep.Length != 8) //Considera endereços do Brasil
             {
                 Console.WriteLine("CEP inválido! O CEP deve ter 8 caracteres.");
                 return null;
@@ -31,16 +31,16 @@ namespace Cadastro_de_Alunos.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    /*Console.WriteLine($"Conteúdo da resposta: {content}");*/ //Verificar o retorno da API
+                    /*Console.WriteLine($"Conteúdo da resposta: {content}");*/ //Verificar o retorno da API para análise de erros
                     var endereco = JsonSerializer.Deserialize<Endereco>(content);
 
                     if (endereco == null)
                     {
-                        Console.WriteLine("A deserialização falhou. O objeto endereco é nulo.");
+                        Console.WriteLine("A deserialização falhou. O 'objeto' endereco é nulo.");
                         return null;
                     }
 
-                    // Verificar o conteúdo das propriedades da classe Endereco após a deserialização
+                    // Verificar o conteúdo das propriedades da classe Endereco após a deserialização, utilizei para verificação de erros
                     /*Console.WriteLine("Conteúdo de endereco após deserialização:");
                     Console.WriteLine($"CEP: {endereco.Cep}");
                     Console.WriteLine($"Logradouro: {endereco.Logradouro}");

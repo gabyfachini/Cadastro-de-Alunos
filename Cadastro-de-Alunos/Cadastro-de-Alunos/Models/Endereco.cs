@@ -9,7 +9,7 @@ namespace Cadastro_de_Alunos.Models
 {
     public class Endereco
     {
-        [JsonPropertyName("cep")] // Especificar o nome exato do campo JSON
+        [JsonPropertyName("cep")] // Especificar o nome exato do campo JSON para evitar erros
         public string Cep { get; set; }
 
         [JsonPropertyName("logradouro")]

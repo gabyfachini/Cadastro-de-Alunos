@@ -16,4 +16,4 @@ internal static class _connectionString
     {
         return Configuration.GetConnectionString(name);
     }
-}
+} //Método de conexão com o banco de dados

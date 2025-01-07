@@ -27,7 +27,7 @@ internal class Program
             Console.WriteLine("1. Cadastrar Aluno");
             Console.WriteLine("2. Listar Alunos");
             Console.WriteLine("3. Buscar Aluno");
-            Console.WriteLine("4. Atualizar Aluno - Não configurado"); //Implementar depois, não é tão importante agora (FRONT?)
+            Console.WriteLine("4. Atualizar Aluno - Não configurado"); //Implementar depois, não é tão importante agora (FRONTEND?)
             Console.WriteLine("5. Excluir Aluno"); 
             Console.WriteLine("0. Sair");
             Console.Write("Opção escolhida: ");
@@ -39,13 +39,13 @@ internal class Program
                 case "1":
                     var novoAluno = new Aluno();
 
-                    Console.WriteLine("Digite o nome do aluno:");
+                    Console.WriteLine("Digite o nome* do aluno:");
                     novoAluno.Nome = Console.ReadLine();
 
-                    Console.WriteLine("Digite o sobrenome do aluno:");
+                    Console.WriteLine("Digite o sobrenome* do aluno:");
                     novoAluno.Sobrenome = Console.ReadLine();
 
-                    Console.WriteLine("Digite a data de nascimento (formato: YYYY-MM-DD):"); //Depois colocar outras opções de formato de datas
+                    Console.WriteLine("Digite a data de nascimento* (formato: YYYY-MM-DD):"); //O tratamento de formato de datas acontece no Front-end
 
                     if (DateTime.TryParse(Console.ReadLine(), out DateTime nascimento))
                     {
@@ -57,7 +57,7 @@ internal class Program
                         return;
                     }
 
-                    Console.WriteLine("Digite o sexo (M/F):");
+                    Console.WriteLine("Digite o sexo* (M/F):");
                     string sexo;
                     do
                     {
@@ -86,6 +86,7 @@ internal class Program
 
                     if (endereco != null)
                     {
+                        Console.WriteLine();
                         Console.WriteLine("Dados do Endereço do Aluno:");
                         Console.WriteLine($"CEP: {endereco.Cep}");
                         Console.WriteLine($"Logradouro: {endereco.Logradouro}");
@@ -116,7 +117,8 @@ internal class Program
                     Console.Clear();
                     break;
 
-                case "2": 
+                case "2":
+                    Console.Clear();
                     Console.WriteLine("REGISTRO DE ALUNOS");
                     Console.WriteLine();
                     GetAppSettingsFile();
@@ -126,18 +128,16 @@ internal class Program
 
                 case "3": 
                     Console.WriteLine("BUSCA DE ALUNO");
-                    Console.WriteLine();
                     GetAppSettingsFile();
                     PrintBuscarAlunos();
                     //posteriormente eu vou colocar uma lista de opções para verificar qual informação do aluno a pessoa quer colocar para verificar no banco de dados (FONTEND)
                     Console.ReadKey();
+                    Console.Clear();
                     break;
 
                 case "4":
                     string connectionString2 = GetConnectionString();
-                    var alunos = GetAlunosFromDatabase(connectionString2);
                     Console.WriteLine("ATUALIZAÇÃO DE CADASTRO");
-                    Console.WriteLine();
                     Console.WriteLine("Qual informação a ser atualizada?");
                     //Criar o código
                     Console.ReadKey();
@@ -146,10 +146,7 @@ internal class Program
 
                 case "5": 
                     Console.WriteLine("EXCLUSÃO DE ALUNO");
-                    Console.WriteLine();
-
                     GetAppSettingsFile();
-                    // Obtendo a string de conexão do appsettings.json
                     string minhaConnectionString = _iconfiguration.GetConnectionString("Default");
 
                     while (true) 
@@ -157,24 +154,20 @@ internal class Program
                         Console.WriteLine("Qual o ID do aluno que cancelou o cadastro?");
                         if (int.TryParse(Console.ReadLine(), out int idEscolhido))
                         {
-                            // Passa a string de conexão para o método SoftDelete
                             SoftDelete(minhaConnectionString, idEscolhido);
-
                         }
                         else
                         {
                             Console.WriteLine("ID inválido. Tente novamente.");
                         }
-
+                        Console.WriteLine();
                         Console.WriteLine("Deseja excluir outro aluno? (S/N)");
                         string resposta2 = Console.ReadLine()?.ToUpper();
                         if (resposta2 != "S")
                         {
                             break;
                         }
-                        Console.Clear(); 
                     }
-
                     Console.ReadKey(); 
                     Console.Clear();
                     break;
@@ -201,7 +194,7 @@ internal class Program
         {
             if (aluno == null)
             {
-                throw new ArgumentNullException(nameof(aluno), "O aluno não pode ser nulo.");
+                throw new ArgumentNullException(nameof(aluno), "O nome do aluno precisa ser preenchido.");
             }
             var sql = @"
         INSERT INTO Aluno 
@@ -236,17 +229,6 @@ internal class Program
 
         }
 
-        static List<Aluno> GetAlunosFromDatabase(string connectionString) // Método para buscar alunos no banco de dados
-        {
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                var sql = "SELECT * FROM Aluno WHERE Ativo = 1";
-                var alunos = connection.Query<Aluno>(sql).ToList(); // Usando Dapper para mapear os dados para objetos Aluno
-                return alunos;
-            }
-        }
-
         void PrintListarAlunos()
         {
             var AlunoDAL = new AlunoDAL(_iconfiguration);
@@ -254,8 +236,7 @@ internal class Program
             listAluno.ForEach(item =>
             {
                 Console.WriteLine($"ID: {item.Id}");
-                Console.WriteLine($"Nome: {item.Nome}");
-                Console.WriteLine($"Sobrenome: {item.Sobrenome}");
+                Console.WriteLine($"Nome: {item.Nome} {item.Sobrenome}");
                 Console.WriteLine($"Nascimento: {item.Nascimento}");
                 Console.WriteLine($"Sexo: {item.Sexo}");
                 Console.WriteLine($"Email: {item.Email}");
@@ -264,8 +245,7 @@ internal class Program
                 Console.WriteLine($"Logradouro: {item.Logradouro}");
                 Console.WriteLine($"Complemento: {item.Complemento}");
                 Console.WriteLine($"Bairro: {item.Bairro}");
-                Console.WriteLine($"Localidade/Cidade: {item.Localidade}");
-                Console.WriteLine($"UF: {item.UF}");
+                Console.WriteLine($"Localidade/Cidade: {item.Localidade} {item.UF}");
                 Console.WriteLine();
             });
             Console.WriteLine("Pressione qualquer tecla para voltar ao menu");
@@ -278,7 +258,6 @@ internal class Program
             var Aluno = new AlunoDAL(_iconfiguration);
             var listAluno = Aluno.GetList();
             Console.Write("Digite o ID do aluno que deseja buscar: ");
-            Console.WriteLine();
 
             while (true)
             {
@@ -288,9 +267,9 @@ internal class Program
 
                     if (aluno != null)
                     {
+                        Console.WriteLine();
                         Console.WriteLine($"ID: {aluno.Id}");
-                        Console.WriteLine($"Nome: {aluno.Nome}");
-                        Console.WriteLine($"Sobrenome: {aluno.Sobrenome}");
+                        Console.WriteLine($"Nome: {aluno.Nome} {aluno.Sobrenome}");
                         Console.WriteLine($"Nascimento: {aluno.Nascimento}");
                         Console.WriteLine($"Sexo: {aluno.Sexo}");
                         Console.WriteLine($"Email: {aluno.Email}");
@@ -299,17 +278,16 @@ internal class Program
                         Console.WriteLine($"Logradouro: {aluno.Logradouro}");
                         Console.WriteLine($"Complemento: {aluno.Complemento}");
                         Console.WriteLine($"Bairro: {aluno.Bairro}");
-                        Console.WriteLine($"Localidade/Cidade: {aluno.Localidade}");
-                        Console.WriteLine($"UF: {aluno.UF}");
+                        Console.WriteLine($"Localidade/Cidade: {aluno.Localidade} {aluno.UF}");
                     }
                     else
                     {
+                        Console.WriteLine();
                         Console.WriteLine("Aluno não encontrado.");
                     }
                 }
+                Console.WriteLine();
                 Console.WriteLine("Pressione qualquer tecla para voltar ao menu");
-                Console.ReadKey();
-                Console.Clear();
                 return;
             }
         }
@@ -327,14 +305,13 @@ internal class Program
             {
                 using (var command = new SqlCommand(sql, connection))
                 {
-                    // Adiciona os parâmetros
                     command.Parameters.AddWithValue("@Id", idAluno);
                     command.Parameters.AddWithValue("@DataDeAtualizacao", DateTime.Now);
 
                     try
                     {
-                        connection.Open(); // Abre a conexão
-                        int rowsAffected = command.ExecuteNonQuery(); // Executa o comando SQL
+                        connection.Open(); 
+                        int rowsAffected = command.ExecuteNonQuery(); 
 
                         if (rowsAffected > 0)
                         {
@@ -353,17 +330,10 @@ internal class Program
             }
         }
 
-        static string GetConnectionString() // Método para obter o connectionString do appsettings.json ou de algum outro lugar
+        string GetConnectionString() // Método para obter o connectionString do appsettings.json
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-
-            var configuration = builder.Build();
-            return configuration.GetConnectionString("Default");
+            return _iconfiguration.GetConnectionString("Default");
         }
-
-       
 
     }
 }

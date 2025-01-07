@@ -10,8 +10,7 @@ using Cadastro_de_Alunos.Models;
 using System.ComponentModel.DataAnnotations;
 using Cadastro_de_Alunos.Services;
 
-//Representa a camada de acesso a dados
-namespace Cadastro_de_Alunos.DAL
+namespace Cadastro_de_Alunos.DAL //Representa a camada de acesso a dados
 {
     public class AlunoDAL
     {
@@ -27,7 +26,7 @@ namespace Cadastro_de_Alunos.DAL
             {
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
-                    // Modificando a consulta SQL para incluir o filtro Ativo = 1
+                    // Consulta SQL com o filtro Ativo = 1, ou seja, não exibe usuários que estão inativados no Banco de Dados
                     SqlCommand cmd = new SqlCommand("SELECT Id, Nome, Sobrenome, Nascimento, Sexo, Email, Telefone, Cep, Logradouro, Complemento, Bairro, Localidade, UF, DataDeAtualizacao, Ativo FROM Aluno WHERE Ativo = 1", con);
                     cmd.CommandType = CommandType.Text; // Mudando de CommandType.StoredProcedure para CommandType.Text para usar a consulta SQL diretamente
                     con.Open();
@@ -42,7 +41,6 @@ namespace Cadastro_de_Alunos.DAL
                             Nascimento = Convert.ToDateTime(rdr[3]),
                             Sexo = Convert.ToChar(rdr[4]),
                             Email = Convert.ToString(rdr[5]),
-                            /*DataDeCadastro = Convert.ToDateTime(rdr[15]),*/ //Essa informção está vindo errada
                             Telefone = Convert.ToString(rdr[6]),
                             Cep = Convert.ToString(rdr[7]),
                             Logradouro = Convert.ToString(rdr[8]),
@@ -52,6 +50,7 @@ namespace Cadastro_de_Alunos.DAL
                             UF = Convert.ToString(rdr[12]),
                             DataDeAtualizacao = Convert.ToDateTime(rdr[13]),
                             Ativo = Convert.ToBoolean(rdr[14])
+                            //Observação: aqui eu não trouxe a DataDeCadastro porque é uma informação interna do Banco de Dados, caso seja necessária, é precisso incluir aqui para visualização da informação
                         });
                     }
                 }
