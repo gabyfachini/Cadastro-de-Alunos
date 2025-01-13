@@ -102,7 +102,7 @@ internal class Program
                         novoAluno.Localidade = endereco.Localidade;
                         novoAluno.UF = endereco.UF;
 
-                        string connectionString = _connectionString.GetConnectionString("Default");
+                        string connectionString = /*_connectionString*/_iconfiguration.GetConnectionString("Default");
                         CadastrarAluno(novoAluno, connectionString);
 
                         Console.WriteLine();
@@ -192,6 +192,8 @@ internal class Program
 
         void CadastrarAluno(Aluno aluno, string _connectionString) //Envio de informações para o Banco de Dados
         {
+            string connectionString = _iconfiguration.GetConnectionString("Default");
+
             if (aluno == null)
             {
                 throw new ArgumentNullException(nameof(aluno), "O nome do aluno precisa ser preenchido.");
