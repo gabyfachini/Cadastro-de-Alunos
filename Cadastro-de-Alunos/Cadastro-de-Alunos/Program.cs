@@ -27,7 +27,7 @@ internal class Program
             Console.WriteLine("1. Cadastrar Aluno");
             Console.WriteLine("2. Listar Alunos");
             Console.WriteLine("3. Buscar Aluno");
-            Console.WriteLine("4. Atualizar Aluno - Não configurado"); //Implementar depois, não é tão importante agora (FRONTEND?)
+            Console.WriteLine("4. Atualizar Aluno - Não configurado"); //Implementar depois, não é tão importante agora
             Console.WriteLine("5. Excluir Aluno"); 
             Console.WriteLine("0. Sair");
             Console.Write("Opção escolhida: ");
