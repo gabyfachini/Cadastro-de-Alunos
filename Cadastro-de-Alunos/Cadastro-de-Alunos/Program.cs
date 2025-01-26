@@ -8,10 +8,11 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Dapper;
+using Dapper; 
 using System.Net.Http;
 using Newtonsoft.Json;
-using System.Reflection.Metadata;
+using System.Reflection.Metadata; 
+using System.ComponentModel.DataAnnotations;
 
 internal class Program
 {
@@ -27,7 +28,7 @@ internal class Program
             Console.WriteLine("1. Cadastrar Aluno");
             Console.WriteLine("2. Listar Alunos");
             Console.WriteLine("3. Buscar Aluno");
-            Console.WriteLine("4. Atualizar Aluno - Não configurado"); //Implementar depois, não é tão importante agora
+            Console.WriteLine("4. Atualizar Aluno - Não configurado"); //Geralmente nesse caso é melhor validar pelo front-end já considerando a usabilidade do cliente
             Console.WriteLine("5. Excluir Aluno"); 
             Console.WriteLine("0. Sair");
             Console.Write("Opção escolhida: ");
@@ -39,14 +40,23 @@ internal class Program
                 case "1":
                     var novoAluno = new Aluno();
 
-                    Console.WriteLine("Digite o nome* do aluno:");
+                    Console.WriteLine("Digite o nome do aluno:");
                     novoAluno.Nome = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(novoAluno.Nome) || novoAluno.Nome.Length < 2 || novoAluno.Nome.Length > 100)
+                    {
+                        Console.WriteLine("Nome deve ter entre 2 e 100 caracteres e não pode ser vazio.");
+                        return;
+                    }
 
-                    Console.WriteLine("Digite o sobrenome* do aluno:");
+                    Console.WriteLine("Digite o sobrenome do aluno:");
                     novoAluno.Sobrenome = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(novoAluno.Sobrenome) || novoAluno.Sobrenome.Length < 2 || novoAluno.Sobrenome.Length > 100)
+                    {
+                        Console.WriteLine("Sobrenome deve ter entre 2 e 100 caracteres e não pode ser vazio.");
+                        return;
+                    }
 
-                    Console.WriteLine("Digite a data de nascimento* (formato: YYYY-MM-DD):"); //O tratamento de formato de datas acontece no Front-end
-
+                    Console.WriteLine("Digite a data de nascimento (formato: YYYY-MM-DD):"); //O tratamento de formato de datas acontece no Front-end
                     if (DateTime.TryParse(Console.ReadLine(), out DateTime nascimento))
                     {
                         novoAluno.Nascimento = nascimento;
@@ -57,7 +67,7 @@ internal class Program
                         return;
                     }
 
-                    Console.WriteLine("Digite o sexo* (M/F):");
+                    Console.WriteLine("Digite o sexo (M/F):");
                     string sexo;
                     do
                     {
@@ -72,6 +82,11 @@ internal class Program
 
                     Console.WriteLine("Digite o email:");
                     novoAluno.Email = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(novoAluno.Email) || !new EmailAddressAttribute().IsValid(novoAluno.Email) || !novoAluno.Email.EndsWith("@exemplo.com"))
+                    {
+                        Console.WriteLine("E-mail inválido ou o e-mail não pertence ao domínio 'exemplo.com'.");
+                        return;
+                    }
 
                     Console.WriteLine("Digite o telefone:");
                     novoAluno.Telefone = Console.ReadLine();
@@ -97,16 +112,31 @@ internal class Program
 
                         novoAluno.Cep = endereco.Cep;
                         novoAluno.Logradouro = endereco.Logradouro;
-                        novoAluno.Complemento = endereco.Complemento ?? "N/A"; // Se complemento for nulo subtitui por N/A
+                        novoAluno.Complemento = string.IsNullOrWhiteSpace(endereco.Complemento) ? "N/A" : endereco.Complemento;
                         novoAluno.Bairro = endereco.Bairro;
                         novoAluno.Localidade = endereco.Localidade;
                         novoAluno.UF = endereco.UF;
 
-                        string connectionString = /*_connectionString*/_iconfiguration.GetConnectionString("Default");
-                        CadastrarAluno(novoAluno, connectionString);
+                        // Validação do modelo usando os validadores de data annotations
+                        var validationContext = new ValidationContext(novoAluno);
+                        var validationResults = new List<ValidationResult>();
+                        bool isValid = Validator.TryValidateObject(novoAluno, validationContext, validationResults, true);
 
-                        Console.WriteLine();
-                        Console.WriteLine("Aluno cadastrado com sucesso!");
+                        if (isValid)
+                        {
+                            string connectionString = _connectionString.GetConnectionString("Default");
+                            CadastrarAluno(novoAluno, connectionString);
+
+                            Console.WriteLine();
+                            Console.WriteLine("Aluno cadastrado com sucesso!");
+                        }
+                        else
+                        {
+                            foreach (var validationResult in validationResults)
+                            {
+                                Console.WriteLine($"Erro de validação: {validationResult.ErrorMessage}");
+                            }
+                        }
                     }
                     else
                     {
@@ -130,7 +160,7 @@ internal class Program
                     Console.WriteLine("BUSCA DE ALUNO");
                     GetAppSettingsFile();
                     PrintBuscarAlunos();
-                    //posteriormente eu vou colocar uma lista de opções para verificar qual informação do aluno a pessoa quer colocar para verificar no banco de dados (FONTEND)
+                    //posteriormente eu vou colocar uma lista de opções para verificar qual informação do aluno a pessoa quer colocar para verificar no banco de dados (Front-end)
                     Console.ReadKey();
                     Console.Clear();
                     break;

@@ -1,6 +1,6 @@
-﻿/*using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
-/*internal static class _connectionString
+internal static class _connectionString
 {
     private static IConfiguration Configuration { get; }
 
@@ -16,4 +16,4 @@
     {
         return Configuration.GetConnectionString(name);
     }
-} //Método de conexão com o banco de dados*/
+} //Método de conexão com o banco de dados
