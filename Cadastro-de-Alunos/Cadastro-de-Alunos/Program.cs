@@ -28,7 +28,7 @@ internal class Program
             Console.WriteLine("1. Cadastrar Aluno");
             Console.WriteLine("2. Listar Alunos");
             Console.WriteLine("3. Buscar Aluno");
-            Console.WriteLine("4. Atualizar Aluno - Não configurado"); //Geralmente nesse caso é melhor validar pelo front-end já considerando a usabilidade do cliente
+            Console.WriteLine("4. Atualizar Aluno - Em configuração"); //Geralmente nesse caso é melhor validar pelo front-end já considerando a usabilidade do cliente
             Console.WriteLine("5. Excluir Aluno"); 
             Console.WriteLine("0. Sair");
             Console.Write("Opção escolhida: ");
@@ -166,10 +166,102 @@ internal class Program
                     break;
 
                 case "4":
-                    string connectionString2 = GetConnectionString();
+                    string connectionStringAdjust = GetConnectionString();
+
+                    if (string.IsNullOrEmpty(connectionStringAdjust))
+                    {
+                        Console.WriteLine("A string de conexão não foi inicializada corretamente.");
+                        return;
+                    }
+
                     Console.WriteLine("ATUALIZAÇÃO DE CADASTRO");
-                    Console.WriteLine("Qual informação a ser atualizada?");
-                    //Criar o código
+                    GetAppSettingsFile();
+                    Console.Write("Digite o ID do aluno que deseja buscar: ");
+                    int alunoId;
+
+                    if (int.TryParse(Console.ReadLine(), out alunoId))
+                    {
+                        Console.WriteLine();
+                        PrintAjustarAlunos(alunoId);
+
+                        Console.WriteLine("Qual informação deseja atualizar?");
+                        Console.WriteLine("A. Nome");
+                        Console.WriteLine("B. Sobrenome");
+                        Console.WriteLine("C. Nascimento");
+                        Console.WriteLine("D. Sexo");
+                        Console.WriteLine("E. Email");
+                        Console.WriteLine("F. Telefone");
+                        Console.WriteLine("G. Endereço");
+                        Console.Write("Digite a opção: ");
+                        string escolha = Console.ReadLine()?.ToUpper();
+                        Console.WriteLine();
+
+                        switch (escolha)
+                        {
+                            case "A":
+                                Console.WriteLine("Digite o novo nome:");
+                                string novoNome = Console.ReadLine();
+                                AtualizarAluno(connectionStringAdjust, alunoId, "Nome", novoNome);
+                                break;
+
+                            case "B":
+                                Console.WriteLine("Digite o novo sobrenome:");
+                                string novoSobrenome = Console.ReadLine();
+                                AtualizarAluno(connectionStringAdjust, alunoId, "Sobrenome", novoSobrenome);
+                                break;
+
+                            case "C":
+                                Console.WriteLine("Digite a nova data de nascimento (formato: YYYY-MM-DD):");
+                                if (DateTime.TryParse(Console.ReadLine(), out DateTime novaDataNascimento))
+                                {
+                                    AtualizarAluno(connectionStringAdjust, alunoId, "Nascimento", novaDataNascimento.ToString("yyyy-MM-dd"));
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Data inválida!");
+                                }
+                                break;
+
+                            case "D":
+                                Console.WriteLine("Digite o novo sexo (M/F):");
+                                string novoSexo = Console.ReadLine().ToUpper();
+                                if (novoSexo == "M" || novoSexo == "F")
+                                {
+                                    AtualizarAluno(connectionStringAdjust, alunoId, "Sexo", novoSexo);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Sexo inválido!");
+                                }
+                                break;
+
+                            case "E":
+                                Console.WriteLine("Digite o novo e-mail:");
+                                string novoEmail = Console.ReadLine();
+                                AtualizarAluno(connectionStringAdjust, alunoId, "Email", novoEmail);
+                                break;
+
+                            case "F":
+                                Console.WriteLine("Digite o novo telefone:");
+                                string novoTelefone = Console.ReadLine();
+                                AtualizarAluno(connectionStringAdjust, alunoId, "Telefone", novoTelefone);
+                                break;
+
+                            case "G": //Implementar usando a API
+                                Console.WriteLine("Digite o novo CEP:");
+                                string novoCep = Console.ReadLine();
+                                break;
+
+                            default:
+                                Console.WriteLine("Opção inválida. Tente novamente.");
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID inválido.");
+                    }
+
                     Console.ReadKey();
                     Console.Clear();
                     break;
@@ -213,12 +305,19 @@ internal class Program
         }
 
         void GetAppSettingsFile() //Método de conexão com o banco de dados
-            {
+        {
                 var builder = new ConfigurationBuilder()
                                      .SetBasePath(Directory.GetCurrentDirectory())
                                      .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
                 _iconfiguration = builder.Build();
-            }
+            string connectionString = GetConnectionString();
+            Console.WriteLine("String de Conexão Carregada: " + connectionString);
+        }
+
+        string GetConnectionString() // Método para obter o connectionString do appsettings.json e é bom para usar em injeção de dependência
+        {
+            return _iconfiguration.GetConnectionString("Default");
+        }
 
         void CadastrarAluno(Aluno aluno, string _connectionString) //Envio de informações para o Banco de Dados
         {
@@ -261,7 +360,7 @@ internal class Program
 
         }
 
-        void PrintListarAlunos()
+        void PrintListarAlunos() //Lista todos os alunos do banco de dados
         {
             var AlunoDAL = new AlunoDAL(_iconfiguration);
             var listAluno = AlunoDAL.GetList();
@@ -285,7 +384,7 @@ internal class Program
             Console.Clear();
         }
 
-        void PrintBuscarAlunos()
+        void PrintBuscarAlunos() //Busca um aluno por ID específico
         {
             var Aluno = new AlunoDAL(_iconfiguration);
             var listAluno = Aluno.GetList();
@@ -321,6 +420,81 @@ internal class Program
                 Console.WriteLine();
                 Console.WriteLine("Pressione qualquer tecla para voltar ao menu");
                 return;
+            }
+        }
+
+        void PrintAjustarAlunos(int alunoId) //Busca o aluno que vai ter as iñformações alteradas
+        {
+            var Aluno = new AlunoDAL(_iconfiguration);
+            var listAluno = Aluno.GetList();
+
+            var aluno = listAluno.FirstOrDefault(a => a.Id == alunoId);
+
+            if (aluno != null)
+            {
+                Console.WriteLine($"Nome: {aluno.Nome}");
+                Console.WriteLine($"Sobrenome: {aluno.Sobrenome}");
+                Console.WriteLine($"Nascimento: {aluno.Nascimento}");
+                Console.WriteLine($"Sexo: {aluno.Sexo}");
+                Console.WriteLine($"Email: {aluno.Email}");
+                Console.WriteLine($"Telefone: {aluno.Telefone}");
+                Console.WriteLine($"CEP: {aluno.Cep}");
+                Console.WriteLine($"Logradouro: {aluno.Logradouro}");
+                Console.WriteLine($"Complemento: {aluno.Complemento}");
+                Console.WriteLine($"Bairro: {aluno.Bairro}");
+                Console.WriteLine($"Localidade/Cidade: {aluno.Localidade} {aluno.UF}");
+            }
+            else
+            {
+                Console.WriteLine("Aluno não encontrado.");
+            }
+
+            Console.WriteLine();
+        }
+
+        static void AtualizarAluno(string connectionString, int alunoId, string campo, string novoValor)
+        {
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                Console.WriteLine("A string de conexão não foi inicializada corretamente.");
+                return;
+            }
+
+            // Query SQL para atualizar o campo específico do aluno
+            var sql = $@"
+        UPDATE Aluno 
+        SET {campo} = @NovoValor, DataDeAtualizacao = @DataDeAtualizacao
+        WHERE Id = @Id";
+
+            // Conexão com o banco de dados
+            using (var connection = new SqlConnection(connectionString))
+            {
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", alunoId);
+                    command.Parameters.AddWithValue("@NovoValor", novoValor);
+                    command.Parameters.AddWithValue("@DataDeAtualizacao", DateTime.Now);
+
+                    try
+                    {
+                        connection.Open();
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            Console.WriteLine($"Cadastro do aluno com ID {alunoId} foi atualizado com sucesso.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Aluno não encontrado no banco de dados.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erro ao atualizar aluno: {ex.Message}");
+                    }
+                }
             }
         }
 
@@ -361,11 +535,5 @@ internal class Program
                 }
             }
         }
-
-        string GetConnectionString() // Método para obter o connectionString do appsettings.json
-        {
-            return _iconfiguration.GetConnectionString("Default");
-        }
-
     }
 }
