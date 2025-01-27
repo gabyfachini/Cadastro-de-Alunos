@@ -28,7 +28,7 @@ internal class Program
             Console.WriteLine("1. Cadastrar Aluno");
             Console.WriteLine("2. Listar Alunos");
             Console.WriteLine("3. Buscar Aluno");
-            Console.WriteLine("4. Atualizar Aluno - Em configuração"); //Geralmente nesse caso é melhor validar pelo front-end já considerando a usabilidade do cliente
+            Console.WriteLine("4. Atualizar Aluno"); //Geralmente nesse caso é melhor validar pelo front-end já considerando a usabilidade do cliente
             Console.WriteLine("5. Excluir Aluno"); 
             Console.WriteLine("0. Sair");
             Console.Write("Opção escolhida: ");
@@ -166,13 +166,13 @@ internal class Program
                     break;
 
                 case "4":
-                    string connectionStringAdjust = GetConnectionString();
-
+                    string connectionStringAdjust = _connectionString.GetConnectionString("Default");
+                    /*Console.WriteLine($"Connection String: {connectionStringAdjust}");
                     if (string.IsNullOrEmpty(connectionStringAdjust))
                     {
                         Console.WriteLine("A string de conexão não foi inicializada corretamente.");
                         return;
-                    }
+                    }*/ //Validador para verificar o retorno da conexão e identificar onde esta tendo a perda de informação
 
                     Console.WriteLine("ATUALIZAÇÃO DE CADASTRO");
                     GetAppSettingsFile();
@@ -310,8 +310,8 @@ internal class Program
                                      .SetBasePath(Directory.GetCurrentDirectory())
                                      .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
                 _iconfiguration = builder.Build();
-            string connectionString = GetConnectionString();
-            Console.WriteLine("String de Conexão Carregada: " + connectionString);
+            /*string connectionString = GetConnectionString();
+            Console.WriteLine("String de Conexão Carregada: " + connectionString);*/ //Validador para verificar o retorno da conexão e identificar onde esta tendo a perda de informação
         }
 
         string GetConnectionString() // Método para obter o connectionString do appsettings.json e é bom para usar em injeção de dependência
