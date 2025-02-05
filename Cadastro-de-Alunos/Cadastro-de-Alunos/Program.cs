@@ -1,4 +1,6 @@
 ﻿using Cadastro_de_Alunos;
+﻿using Cadastro_de_Alunos.DAL; //Namespace do projeto
+using Cadastro_de_Alunos;
 using Cadastro_de_Alunos.DAL;
 using Cadastro_de_Alunos.Models;
 using Cadastro_de_Alunos.Services;
@@ -9,14 +11,22 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapper; 
+using Dapper;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Reflection.Metadata; 
+using System.Reflection.Metadata;
 using System.ComponentModel.DataAnnotations;
+using Cadastro_de_Alunos.Models; //Namespace do projeto
+using Cadastro_de_Alunos.Services; //Namespace do projeto
+using Microsoft.Extensions.Configuration; //Leitura do arquivo de configuração appsettings.json
+using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel.DataAnnotations; //Validação de Modelos
+using System.Data.SqlClient; //Banco de Dados
 
 internal class Program
 {
-    private static async Task /*void*/ Main(string[] args)
+    private static async Task Main(string[] args)
     {
         IConfiguration _iconfiguration = null;
 
@@ -29,7 +39,7 @@ internal class Program
             Console.WriteLine("2. Listar Alunos");
             Console.WriteLine("3. Buscar Aluno");
             Console.WriteLine("4. Atualizar Aluno"); //Geralmente nesse caso é melhor validar pelo front-end já considerando a usabilidade do cliente
-            Console.WriteLine("5. Excluir Aluno"); 
+            Console.WriteLine("5. Excluir Aluno");
             Console.WriteLine("0. Sair");
             Console.Write("Opção escolhida: ");
             string opcao = Console.ReadLine();
@@ -93,7 +103,7 @@ internal class Program
 
                     novoAluno.DataDeAtualizacao = novoAluno.DataDeCadastro = DateTime.Now;
                     novoAluno.Ativo = true;
-                    
+
                     Console.WriteLine("Digite o CEP:");
                     var viaCepService = new ViaCepService(new HttpClient());
                     string cep = Console.ReadLine();
@@ -156,7 +166,7 @@ internal class Program
                     Console.Clear();
                     break;
 
-                case "3": 
+                case "3":
                     Console.WriteLine("BUSCA DE ALUNO");
                     GetAppSettingsFile();
                     PrintBuscarAlunos();
@@ -266,33 +276,34 @@ internal class Program
                     Console.Clear();
                     break;
 
-                case "5": 
-                    Console.WriteLine("EXCLUSÃO DE ALUNO");
-                    GetAppSettingsFile();
-                    string minhaConnectionString = _iconfiguration.GetConnectionString("Default");
+                case "5":
 
-                    while (true) 
+                Console.WriteLine("EXCLUSÃO DE ALUNO");
+                GetAppSettingsFile();
+                string minhaConnectionString = _iconfiguration.GetConnectionString("Default");
+
+                while (true)
+                {
+                    Console.WriteLine("Qual o ID do aluno que cancelou o cadastro?");
+                    if (int.TryParse(Console.ReadLine(), out int idEscolhido))
                     {
-                        Console.WriteLine("Qual o ID do aluno que cancelou o cadastro?");
-                        if (int.TryParse(Console.ReadLine(), out int idEscolhido))
-                        {
-                            SoftDelete(minhaConnectionString, idEscolhido);
-                        }
-                        else
-                        {
-                            Console.WriteLine("ID inválido. Tente novamente.");
-                        }
-                        Console.WriteLine();
-                        Console.WriteLine("Deseja excluir outro aluno? (S/N)");
-                        string resposta2 = Console.ReadLine()?.ToUpper();
-                        if (resposta2 != "S")
-                        {
-                            break;
-                        }
+                        SoftDelete(minhaConnectionString, idEscolhido);
                     }
-                    Console.ReadKey(); 
-                    Console.Clear();
-                    break;
+                    else
+                    {
+                        Console.WriteLine("ID inválido. Tente novamente.");
+                    }
+                    Console.WriteLine();
+                    Console.WriteLine("Deseja excluir outro aluno? (S/N)");
+                    string resposta2 = Console.ReadLine()?.ToUpper();
+                    if (resposta2 != "S")
+                    {
+                        break;
+                    }
+                }
+                Console.ReadKey();
+                Console.Clear();
+                break;
 
                 case "0":
                     Console.WriteLine("O programa está prestes a ser encerrado.");
@@ -306,10 +317,10 @@ internal class Program
 
         void GetAppSettingsFile() //Método de conexão com o banco de dados
         {
-                var builder = new ConfigurationBuilder()
-                                     .SetBasePath(Directory.GetCurrentDirectory())
-                                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-                _iconfiguration = builder.Build();
+            var builder = new ConfigurationBuilder()
+                                 .SetBasePath(Directory.GetCurrentDirectory())
+                                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            _iconfiguration = builder.Build();
             /*string connectionString = GetConnectionString();
             Console.WriteLine("String de Conexão Carregada: " + connectionString);*/ //Validador para verificar o retorno da conexão e identificar onde esta tendo a perda de informação
         }
@@ -516,8 +527,8 @@ internal class Program
 
                     try
                     {
-                        connection.Open(); 
-                        int rowsAffected = command.ExecuteNonQuery(); 
+                        connection.Open();
+                        int rowsAffected = command.ExecuteNonQuery();
 
                         if (rowsAffected > 0)
                         {
